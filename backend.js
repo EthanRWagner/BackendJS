@@ -63,6 +63,11 @@ function findUserById(id) {
     //return users['users_list'].filter( (user) => user['id'] === id);
 }
 
+//adding a new user to user_list
+function addUser(user){
+    users['users_list'].push(user);
+}
+
 //route managing for name request
 app.get('/users', (req, res) => {
     const name = req.query.name;
@@ -86,4 +91,11 @@ app.get('/users/:id', (req, res) => {
         result = {users_list: result};
         res.send(result);
     }
+});
+
+//post a new user
+app.post('/users', (req, res) => {
+    const userToAdd = req.body;
+    addUser(userToAdd);
+    res.status(200).end();
 });
