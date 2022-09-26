@@ -1,3 +1,6 @@
+//run while coding: "npm run dev"
+//run in prod env: "npm start"
+
 //imported express module for http calls to route
 const express = require('express');
 //instance of express
@@ -49,7 +52,18 @@ const users = {
     ]
 }
 
-//returns entire list of users
+const findUserByName = (name) => { 
+    return users['users_list'].filter( (user) => user['name'] === name); 
+}
+
 app.get('/users', (req, res) => {
-    res.send(users);
+    const name = req.query.name;
+    if (name != undefined){
+        let result = findUserByName(name);
+        result = {users_list: result};
+        res.send(result);
+    }
+    else{
+        res.send(users);
+    }
 });
