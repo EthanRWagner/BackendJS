@@ -1,12 +1,16 @@
 //run while coding: "npm run dev"
 //run in prod env: "npm start"
 
+// import cross-origin resourse sharing
+const cors = require('cors');
 //imported express module for http calls to route
 const express = require('express');
 //instance of express
 const app = express();
 const port = 5000;
 
+// use cross-origin resource sharing
+app.use(cors());
 //express app to process data
 app.use(express.json());
 
@@ -68,13 +72,30 @@ function addUser(user){
     users['users_list'].push(user);
 }
 
+//deleting a user from user_list
+function deleteUser(user) {
+    const user_count = users['users_list'].length;
+    for (var i = 0; i < user_count; i++){
+        if (users['users_list'][i]['id'] === user) {
+            users['users_list'].splice(i, 1);
+            return;
+        }
+    }
+}
+
 //route managing for name request
 app.get('/users', (req, res) => {
     const name = req.query.name;
-    if (name != undefined){
+    const id = req.query.id;
+    if (name != undefined && id === undefined){
         let result = findUserByName(name);
         result = {users_list: result};
         res.send(result);
+    }
+    else if (name != undefined && id != undefined){
+        let  result = findUserByName(name);
+        const target = result.filter( (user) => user['id'] === id);
+        res.send(target);
     }
     else{
         res.send(users);
@@ -98,4 +119,16 @@ app.post('/users', (req, res) => {
     const userToAdd = req.body;
     addUser(userToAdd);
     res.status(200).end();
+});
+
+//delete an existing user
+app.delete('/users/:id', (req, res) => {
+    const id = req.params['id']; //or req.params.id
+    let result = findUserById(id);
+    if (result === undefined || result.length == 0)
+        res.status(404).send('User does not exist.');
+    else {
+        deleteUser(id);
+        res.send();
+    }
 });
