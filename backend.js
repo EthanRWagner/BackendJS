@@ -1,6 +1,8 @@
 //run while coding: "npm run dev"
 //run in prod env: "npm start"
 
+// alphabet and numbers
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // import cross-origin resourse sharing
 const cors = require('cors');
 //imported express module for http calls to route
@@ -72,6 +74,14 @@ function addUser(user){
     users['users_list'].push(user);
 }
 
+function makeIdRandom(length){
+    var id = "";
+    for(let i=0; i<length; i++){
+        id += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return id;
+}
+
 //deleting a user from user_list
 function deleteUser(user) {
     const user_count = users['users_list'].length;
@@ -87,15 +97,15 @@ function deleteUser(user) {
 app.get('/users', (req, res) => {
     const name = req.query.name;
     const id = req.query.id;
-    if (name != undefined && id === undefined){
-        let result = findUserByName(name);
-        result = {users_list: result};
-        res.send(result);
-    }
-    else if (name != undefined && id != undefined){
+    if (name != undefined && id != undefined){
         let  result = findUserByName(name);
         const target = result.filter( (user) => user['id'] === id);
         res.send(target);
+    }
+    else if (name != undefined && id === undefined){
+        let result = findUserByName(name);
+        result = {users_list: result};
+        res.send(result);
     }
     else{
         res.send(users);
@@ -117,8 +127,9 @@ app.get('/users/:id', (req, res) => {
 //post a new user
 app.post('/users', (req, res) => {
     const userToAdd = req.body;
+    userToAdd['id'] = makeIdRandom(6);
     addUser(userToAdd);
-    res.status(200).end();
+    res.status(201).send(userToAdd).end();
 });
 
 //delete an existing user
@@ -126,9 +137,9 @@ app.delete('/users/:id', (req, res) => {
     const id = req.params['id']; //or req.params.id
     let result = findUserById(id);
     if (result === undefined || result.length == 0)
-        res.status(404).send('User does not exist.');
+        res.status(404).send('Resource not found.');
     else {
         deleteUser(id);
-        res.send();
+        res.status(204);
     }
 });
